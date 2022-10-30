@@ -32,6 +32,13 @@ func RunRPCServer() *grpc.Server {
 	return s
 }
 
+func (s *RPCServer) Ping(ctx context.Context, c *proto.PingRequest) (*proto.PingResponse, error) {
+	return &proto.PingResponse{
+		CanStore: true,
+		BidPrice: "100",
+	}, nil
+}
+
 func (s *RPCServer) GetStats(ctx context.Context, in *proto.Empty) (*proto.GetStatsResponse, error) {
 	color.Set(color.FgYellow)
 	log.Println("RPC::GetStats")

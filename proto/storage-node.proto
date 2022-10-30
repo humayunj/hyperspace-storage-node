@@ -26,7 +26,25 @@ message Empty {
 
 }
 
+message PingRequest {
+    uint64 fileSize = 1;
+    uint32 segmentsCount = 2;
+    string bidPrice = 3; // in wei
+    uint64 timePeriod = 4; 
+}
+message PingResponse {
+    bool canStore = 1;
+    string bidPrice = 2; // in wei
+}
+
 service StorageNode {
     rpc GetStats(Empty) returns (GetStatsResponse) {}
     rpc InitTransaction(InitTransactionRequest) returns (InitTransactionResponse) {}
+
+    /**
+        @notice Can be used to ping this node, with arguments. Latency can be checked using this method.
+    */
+    rpc Ping(PingRequest) returns (PingResponse){}
+
+    
 }

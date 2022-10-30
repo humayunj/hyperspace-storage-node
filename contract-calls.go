@@ -8,13 +8,13 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	store "github.com/storage-node-p1/contracts"
+	contract "github.com/storage-node-p1/contracts"
 )
 
 type ContractGateway struct {
 	client          *ethclient.Client
 	contractAddress common.Address
-	instance        *store.Store
+	instance        *contract.StorageNodeContract
 }
 
 func NewContractRPC(contractAddress string) (*ContractGateway, error) {
@@ -25,7 +25,7 @@ func NewContractRPC(contractAddress string) (*ContractGateway, error) {
 	if err != nil {
 		return nil, err
 	}
-	instance, err := store.NewStore(contractAddr, client)
+	instance, err := contract.NewStorageNodeContract(contractAddr, client)
 	if err != nil {
 		return nil, err
 	}
@@ -117,8 +117,8 @@ func (cg *ContractGateway) ConcludeTransaction(
 	bidAmount *big.Int) error {
 
 	addr := common.HexToAddress(addrHex)
-	var hash [20]byte
-	copy(hash[:], common.Hex2Bytes(fileHash)[:20])
+	var hash [32]byte
+	copy(hash[:], common.Hex2Bytes(fileHash)[:32])
 	tx, err := cg.instance.ConcludeTransaction(nil, 0, addr, hash, fileSize, big.NewInt(time.Now().Unix()), big.NewInt(time.Now().Add(time.Minute*2).Unix()), proveTimeoutLength, concludeTimeoutLength, uint32(segmentsCount), bidAmount)
 	_ = tx
 	return err

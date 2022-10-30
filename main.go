@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
 	"log"
 	"os"
@@ -17,10 +16,9 @@ var JFS JWTFileService
 var CG *ContractGateway
 var NC *NodeConfig
 var GRPCServer *grpc.Server
+var DBS *DBService
 
-const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
-
-func initContract() {
+func initContract(contractAddress string) {
 	color.Set(color.FgYellow)
 	CG, cgErr := NewContractRPC(contractAddress)
 	if cgErr != nil {
@@ -48,6 +46,19 @@ func initContract() {
 	color.Unset()
 }
 
+func openDB() {
+
+	println("Opening DB")
+
+	if _, err := DBS.connect(); err != nil {
+		panic(err)
+	}
+}
+
+func printLn(v ...interface{}) {
+	log.Print(v...)
+}
+
 func tokenTest() {
 	token, err := JFS.CreateFileToken(FileTokenParams{
 		FileHash: "demoFileHash",
@@ -71,44 +82,46 @@ func main() {
 	// To Get the token
 	// tokenTest()
 	// return
-	log.Println("Starting...")
+	println("Starting...")
+	openDB()
+	initContract("")
 
-	initContract()
-
-	log.Println("Loading Configuration")
+	println("Loading Configuration")
 
 	NC = LoadConfig()
 	color.Set(color.FgGreen)
-	log.Println("Total Storage:", NC.TotalStorage, "B")
+	println("Total Storage:", NC.TotalStorage, "B")
 	color.Unset()
 
-	log.Println("Opening DB")
-	FS.Open()
-	log.Println("Fetching Already Uploaded Files")
+	// FS.Open()
+	// println("Fetching Already Uploaded Files")
+	// f, err := FS.GetAllFiles()
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	tw := tabwriter.NewWriter(log.Writer(), 0, 0, 1, ' ', 0)
+	// tw := tabwriter.NewWriter(priter(), 0, 0, 1, ' ', 0)
 
-	color.Set(color.FgGreen)
-	for i, file := range f {
+	// color.Set(color.FgGreen)
+	// for i, file := range f {
 
-		fmt.Fprintln(tw, fmt.Sprint(i)+":\t")
-		fmt.Fprintln(tw, "Path:\t"+file.Path)
-		fmt.Fprintln(tw, "Hash:\t"+hex.EncodeToString(file.Hash))
-		fmt.Fprintln(tw, "Added At:\t"+fmt.Sprint(file.AddedAt))
-		fmt.Fprintln(tw)
-		fmt.Fprintln(tw)
-		tw.Flush()
-	}
-	color.Unset()
+	// 	fmt.Fprintln(tw, fmt.Sprint(i)+":\t")
+	// 	fmt.Fprintln(tw, "Path:\t"+file.Path)
+	// 	fmt.Fprintln(tw, "Hash:\t"+hex.EncodeToString(file.Hash))
+	// 	fmt.Fprintln(tw, "Added At:\t"+fmt.Sprint(file.AddedAt))
+	// 	fmt.Fprintln(tw)
+	// 	fmt.Fprintln(tw)
+	// 	tw.Flush()
+	// }
+	// color.Unset()
 
-	connect()
-	log.Println("Starting HTTP Server")
+	println("Starting HTTP Server")
 	go runHTTPServer()
 
 	// Run Go routine in later
 	// Running in go now will close the main thread
 	RunRPCServer()
 
-	log.Println("Starting RPC Server")
+	println("Starting RPC Server")
 
 }

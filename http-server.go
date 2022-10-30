@@ -93,7 +93,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func runHTTPServer() {
-	color.Blue("HTTP server listening on port 5000")
+	color.Set(color.FgBlue)
+
+	log.Println("HTTP server listening on port 5000")
+	color.Unset()
 	http.HandleFunc("/upload", handler)
 	err := http.ListenAndServe(":5555", nil)
 	if err != nil {
