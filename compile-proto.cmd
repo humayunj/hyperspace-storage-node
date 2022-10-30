@@ -1,0 +1,1 @@
+protoc -I proto/ proto/storage-node.proto --go_out=plugins=grpc:proto
