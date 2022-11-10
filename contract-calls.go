@@ -2,40 +2,31 @@ package main
 
 import (
 	"context"
-	"log"
 	"math/big"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 	contract "github.com/storage-node-p1/contracts"
 )
 
 type ContractGateway struct {
-	client          *ethclient.Client
 	contractAddress common.Address
 	instance        *contract.StorageNodeContract
 }
 
 func NewContractRPC(contractAddress string) (*ContractGateway, error) {
-	const gateway = "http://127.0.0.1:8545" // Todo: Replace with ENV VAR
-	client, err := ethclient.Dial(gateway)
+
 	contractAddr := common.HexToAddress(contractAddress)
 
-	if err != nil {
-		return nil, err
-	}
-	instance, err := contract.NewStorageNodeContract(contractAddr, client)
+	instance, err := contract.NewStorageNodeContract(contractAddr, EClient)
 	if err != nil {
 		return nil, err
 	}
 	c := ContractGateway{
-		client,
+
 		contractAddr,
 		instance,
 	}
-
-	log.Println("Connected to " + gateway + " for contract RPC")
 
 	return &c, nil
 }
@@ -81,7 +72,7 @@ func (cg *ContractGateway) GetContractStats() (*ContractStats, error) {
 }
 
 func (cg *ContractGateway) GetBalance() (*big.Int, error) {
-	blnc, err := cg.client.BalanceAt(context.Background(), cg.contractAddress, nil)
+	blnc, err := EClient.BalanceAt(context.Background(), cg.contractAddress, nil)
 	if err != nil {
 		return nil, err
 	}

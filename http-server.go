@@ -19,13 +19,13 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 
 	authHeader := r.Header.Get("Authorization")
 	if len(authHeader) == 0 {
-		http.Error(w, ("Provide Authorization token"), http.StatusInternalServerError)
+		http.Error(w, ("Provide Authorization token"), http.StatusBadRequest)
 		return
 	}
 
 	authHeader = authHeader[7:] // Skip "bearer "
 	if len(authHeader) == 0 {
-		http.Error(w, ("Provide valid JWT token"), http.StatusInternalServerError)
+		http.Error(w, ("Provide valid JWT token"), http.StatusBadRequest)
 		return
 	}
 	fmt.Printf("Authorization: %v\n", authHeader)
@@ -93,9 +93,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func runHTTPServer() {
-	color.Set(color.FgBlue)
+	color.Set(color.FgMagenta)
 
-	log.Println("HTTP server listening on port 5000")
+	log.Println("Listening HTTP on 5000")
 	color.Unset()
 	http.HandleFunc("/upload", handler)
 	err := http.ListenAndServe(":5555", nil)

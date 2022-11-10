@@ -1,2 +1,4 @@
-total-storage: 1000
-contractAddress: "0x12121212"
+total-storage: 10726932480
+contract-address: 0xB7A5bd0345EF1Cc5E66bf61BdeC17D2461fBd968
+factory-address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+tls-cert: 0x1234

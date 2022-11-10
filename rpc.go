@@ -23,7 +23,9 @@ func RunRPCServer() *grpc.Server {
 	}
 
 	proto.RegisterStorageNodeServer(s, &RPCServer{})
+	color.Set(color.FgMagenta)
 	log.Println("Listening RPC on 8000")
+	color.Unset()
 	err = s.Serve(lis)
 	if err != nil {
 		panic(err)

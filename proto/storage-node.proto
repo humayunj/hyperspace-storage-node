@@ -30,7 +30,7 @@ message PingRequest {
     uint64 fileSize = 1;
     uint32 segmentsCount = 2;
     string bidPrice = 3; // in wei
-    uint64 timePeriod = 4; 
+    uint64 timePeriod = 4; // how long
 }
 message PingResponse {
     bool canStore = 1;

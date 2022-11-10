@@ -1,0 +1,1 @@
+store_password=password go run .
