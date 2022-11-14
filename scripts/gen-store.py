@@ -1,7 +1,7 @@
 import sys
-
-from eth_account import Account
 import json
+from eth_account import Account
+
 private_key = input("Enter private key: ")
 password = input("Enter passphrase: ")
 if len(private_key) == 0 or len(password) == 0:

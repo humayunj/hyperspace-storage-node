@@ -16,7 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	color "github.com/fatih/color"
-	factory "github.com/storage-node-p1/contracts/factory"
+	factory "github.com/storage-node-p1/contracts"
 
 	"google.golang.org/grpc"
 	"gopkg.in/yaml.v3"
@@ -120,7 +120,6 @@ func deployNewContract() (string, error) {
 		return "", err
 	}
 	auth.Value = big.NewInt(0)
-
 	// auth.GasLimit = 0 // estimate
 	auth.GasPrice = gassPrice
 	// nonce, err := EClient.PendingNonceAt(context.Background(), addr)
@@ -132,6 +131,7 @@ func deployNewContract() (string, error) {
 	if NC.FactoryAddress == "" {
 		return "", errors.New("factoryAddress is not specified in config file")
 	}
+
 	println("Deploying contract...")
 	fact, err := factory.NewStorageNodeFactoryContract(common.HexToAddress(NC.FactoryAddress), EClient)
 	if err != nil {
@@ -204,7 +204,7 @@ func main() {
 
 	NC = LoadConfig()
 
-	const gateway = "http://127.0.0.1:8545" // Todo: Replace with CONFIG VAR
+	gateway := NC.ProviderURL // Todo: Replace with CONFIG VAR
 	ec, err := ethclient.Dial(gateway)
 	if err != nil {
 		color.Set(color.FgRed)

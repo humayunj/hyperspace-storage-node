@@ -1,4 +1,7 @@
 total-storage: 10726932480
-contract-address: 0xB7A5bd0345EF1Cc5E66bf61BdeC17D2461fBd968
-factory-address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
-tls-cert: 0x1234
+contract-address: 0x40341D61181D02e7334B680E4Ed5228B5C8d8b15
+factory-address: 0xC6906Df3A9268729EDB78F8eF1E31F59b70DA857
+tls-cert: "0x1234"
+provider: http://host.docker.internal:7545
+fee-per-mb-day: 13020833333
+base-fee: 100000000000000 # 0.00010 Eth

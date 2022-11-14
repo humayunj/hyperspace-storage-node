@@ -7,10 +7,13 @@ import (
 )
 
 type NodeConfig struct {
-	TotalStorage    int64  `yaml:"total-storage"`
-	ContractAddress string `yaml:"contract-address"`
-	FactoryAddress  string `yaml:"factory-address"`
-	TLSCert         string `yaml:"tls-cert"`
+	TotalStorage      int64  `yaml:"total-storage"`
+	ContractAddress   string `yaml:"contract-address"`
+	FactoryAddress    string `yaml:"factory-address"`
+	TLSCert           string `yaml:"tls-cert"`
+	ProviderURL       string `yaml:"provider"`
+	FeeWeiPerMBPerDay string `yaml:"fee-per-mb-day"`
+	FeeBase           string `yaml:"base-fee"`
 }
 
 func LoadConfig() *NodeConfig {
@@ -21,7 +24,7 @@ func LoadConfig() *NodeConfig {
 	config := NodeConfig{}
 	err = yaml.Unmarshal(dat, &config)
 	if err != nil {
-		panic("Failed to unmarshal config")
+		panic("Failed to load config")
 	}
 
 	return &config

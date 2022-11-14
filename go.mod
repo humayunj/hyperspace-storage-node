@@ -6,7 +6,7 @@ replace github.com/storage-node-p1/storage-node-proto => ./proto/
 
 replace github.com/storage-node-p1 => ./
 
-// replace github.com/storage-node-p1-contract => ./contracts
+replace github.com/storage-node-p1/contracts => ./contracts/
 
 require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.0 // indirect
@@ -18,6 +18,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/mattn/go-sqlite3 v1.14.16
+	github.com/storage-node-p1/contracts v0.0.0-00010101000000-000000000000 // indirect
 	github.com/storage-node-p1/storage-node-proto v0.0.0-00010101000000-000000000000
 	golang.org/x/crypto v0.1.0 // indirect
 	google.golang.org/grpc v1.50.1

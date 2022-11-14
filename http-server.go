@@ -1,11 +1,11 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	color "github.com/fatih/color"
@@ -30,7 +30,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Printf("Authorization: %v\n", authHeader)
 
-	r.ParseMultipartForm(1024 * 1024 * 10) // 10 mb
+	r.ParseMultipartForm(1024 * 1024 * 1024 * 10) // 10 GB
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
@@ -41,20 +41,45 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	// fmt.Printf("File Size: %v\n", header.Size)
 
-	h := sha256.New()
-	if _, err := io.Copy(h, file); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
-		return
+	// h := sha256.New()
+
+	dir := "uploads/"
+	if _, err := os.Stat(dir); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(dir, os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
 	}
-	const key = "3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
-	hash := h.Sum(nil)
-	err = FS.AddFile(file, hash, key)
+	path := strings.Join([]string{"uploads/", ("file")}, "")
+
+	newFile, err := os.Create(path)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Print(err)
+		// return err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer file.Close()
+	if _, err := io.Copy(newFile, file); err != nil {
+		log.Print(err)
+		// return err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+	}
+
+	// if _, err := io.Copy(h, file); err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	log.Print(err)
+	// 	return
+	// }
+	// const key = "3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+	// hash := h.Sum(nil)
+	// err = FS.AddFile(file, hash, key)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	log.Print(err)
+	// 	return
+	// }
 
 	type TResp struct {
 		Ok bool `json:"ok"`
@@ -74,9 +99,9 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Uploaded new file")
 	color.Set(color.FgGreen)
 	tw := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-	fmt.Fprintln(tw, "Key\t"+key)
+	// fmt.Fprintln(tw, "Key\t"+key)
 	fmt.Fprintln(tw, "Size\t", header.Size)
-	fmt.Fprintln(tw, "Hash\t", hex.EncodeToString(hash))
+	// fmt.Fprintln(tw, "Hash\t", hex.EncodeToString(hash))
 	tw.Flush()
 	color.Unset()
 	log.Println("TODO: Conclude Transaction with smart contract")
@@ -95,7 +120,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func runHTTPServer() {
 	color.Set(color.FgMagenta)
 
-	log.Println("Listening HTTP on 5000")
+	log.Println("Listening HTTP on 5555")
 	color.Unset()
 	http.HandleFunc("/upload", handler)
 	err := http.ListenAndServe(":5555", nil)
