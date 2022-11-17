@@ -5,3 +5,4 @@ tls-cert: "0x1234"
 provider: http://host.docker.internal:7545
 fee-per-mb-day: 13020833333
 base-fee: 100000000000000 # 0.00010 Eth
+http-url: "http://127.0.0.1:5555/upload"

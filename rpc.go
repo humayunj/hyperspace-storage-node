@@ -89,7 +89,7 @@ func (s *RPCServer) InitTransaction(ctx context.Context, in *proto.InitTransacti
 	log.Println("RPC::InitTransaction")
 	color.Unset()
 	t := FileTokenParams{
-		Bid:           uint64(in.Bid),
+		Bid:           (in.Bid),
 		FileSize:      uint64(in.FileSize),
 		FileHash:      in.FileHash,
 		Timeperiod:    uint64(in.Timeperiod),
@@ -102,6 +102,7 @@ func (s *RPCServer) InitTransaction(ctx context.Context, in *proto.InitTransacti
 	out := proto.InitTransactionResponse{
 		JWT:       token,
 		ExpiresAt: time.Now().Add(time.Minute * 2).Unix(), // 2 Minute
+		HttpURL:   NC.HttpURL,
 	}
 
 	return &out, nil

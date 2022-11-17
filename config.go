@@ -14,6 +14,7 @@ type NodeConfig struct {
 	ProviderURL       string `yaml:"provider"`
 	FeeWeiPerMBPerDay string `yaml:"fee-per-mb-day"`
 	FeeBase           string `yaml:"base-fee"`
+	HttpURL           string `yaml:"http-url"`
 }
 
 func LoadConfig() *NodeConfig {

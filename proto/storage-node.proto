@@ -13,13 +13,14 @@ message InitTransactionRequest {
     int64 fileSize = 1;
     int32 segmentsCount = 2;
     string fileHash = 3; // hex-encoded hash
-    int64 bid = 4;
+    string bid = 4;
     int64 timeperiod = 5;
 }
 
 message InitTransactionResponse {
     string JWT = 1;
     int64 expiresAt = 2;
+    string httpURL = 3;
 }
 
 message Empty {

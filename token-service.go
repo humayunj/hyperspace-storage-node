@@ -12,7 +12,7 @@ import (
 const HmacSecret = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
 type FileTokenParams struct {
-	Bid           uint64 `json:"bid"`
+	Bid           string `json:"bid"`
 	FileSize      uint64 `json:"file_size"`
 	FileHash      string `json:"file_hash"`
 	Timeperiod    uint64 `json:"timeperiod"`
