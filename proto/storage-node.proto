@@ -10,11 +10,15 @@ message GetStatsResponse {
 }
 
 message InitTransactionRequest {
-    int64 fileSize = 1;
-    int32 segmentsCount = 2;
+    uint64 fileSize = 1;
+    uint64 segmentsCount = 2;
     string fileHash = 3; // hex-encoded hash
     string bid = 4;
-    int64 timeperiod = 5;
+    string userAddress = 5;
+    uint64 timeStart = 6;
+    uint64 timeEnd = 7;
+    uint64 concludeTimeout = 8;
+    uint64 ProveTimeout = 9;
 }
 
 message InitTransactionResponse {

@@ -12,11 +12,15 @@ import (
 const HmacSecret = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
 type FileTokenParams struct {
-	Bid           string `json:"bid"`
-	FileSize      uint64 `json:"file_size"`
-	FileHash      string `json:"file_hash"`
-	Timeperiod    uint64 `json:"timeperiod"`
-	SegmentsCount uint64 `json:"segments_count"`
+	Bid             string `json:"bid"`
+	FileSize        uint64 `json:"file_size"`
+	FileHash        string `json:"file_hash"`
+	TimeStart       uint64 `json:"time_start"`
+	TimeEnd         uint64 `json:"time_end"`
+	SegmentsCount   uint64 `json:"segments_count"`
+	UserAddress     string `json:"user_address"`
+	ConcludeTimeout uint64 `json:"conclude_timeout"`
+	ProveTimeout    uint64 `json:"prove_timeout"`
 }
 type JWTFileTokenClaims struct {
 	FileTokenParams
@@ -33,7 +37,7 @@ func (j JWTFileService) CreateFileToken(params FileTokenParams) (string, error) 
 	claims := JWTFileTokenClaims{
 		params,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
 			Issuer:    "storage-node",
 		},
 	}

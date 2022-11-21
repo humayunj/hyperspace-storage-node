@@ -97,7 +97,7 @@ func (cg *ContractGateway) GetLockedCollateral() (*big.Int, error) {
 }
 
 func (cg *ContractGateway) ConcludeTransaction(
-	addrHex string,
+	userAddrHex string,
 	fileHash string,
 	fileSize uint32,
 	timeStart uint64,
@@ -107,7 +107,7 @@ func (cg *ContractGateway) ConcludeTransaction(
 	segmentsCount uint64,
 	bidAmount *big.Int) error {
 
-	addr := common.HexToAddress(addrHex)
+	addr := common.HexToAddress(userAddrHex)
 	var hash [32]byte
 	copy(hash[:], common.Hex2Bytes(fileHash)[:32])
 	tx, err := cg.instance.ConcludeTransaction(nil, 0, addr, hash, fileSize, big.NewInt(time.Now().Unix()), big.NewInt(time.Now().Add(time.Minute*2).Unix()), proveTimeoutLength, concludeTimeoutLength, uint32(segmentsCount), bidAmount)

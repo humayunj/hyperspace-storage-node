@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
 	"os"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/ethereum/go-ethereum/crypto"
 	color "github.com/fatih/color"
 
 	"io"
@@ -29,6 +33,11 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("Authorization: %v\n", authHeader)
+	claims, ok := JFS.ParseToken(authHeader)
+	if ok != nil {
+		http.Error(w, "JWT token is not valid", http.StatusBadRequest)
+		return
+	}
 
 	r.ParseMultipartForm(1024 * 1024 * 1024 * 10) // 10 GB
 
@@ -50,7 +59,28 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 		}
 	}
-	path := strings.Join([]string{"uploads/", ("file")}, "")
+
+	printLn("User address hex", claims.UserAddress[2:])
+	addressBytes, err := hex.DecodeString(claims.UserAddress[2:])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print(err)
+		return
+	}
+	hashBytes, err := hex.DecodeString(claims.FileHash)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print(err)
+		return
+	}
+
+	keyBytes := crypto.Keccak256(bytes.Join([][]byte{addressBytes, hashBytes}, []byte{}))
+
+	keyHex := hex.EncodeToString(keyBytes)
+
+	printLn("Key Hex: ", keyHex)
+
+	path := strings.Join([]string{"uploads/", keyHex}, "")
 
 	newFile, err := os.Create(path)
 	if err != nil {
@@ -66,6 +96,39 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
 	}
+	bid := new(big.Int)
+	bid, success := bid.SetString(claims.Bid, 10)
+	if !success {
+		log.Println("Failed to parse bid")
+	}
+	CG.ConcludeTransaction(claims.UserAddress,
+		claims.FileHash, uint32(claims.FileSize),
+		claims.TimeStart,
+		claims.TimeEnd,
+		claims.ProveTimeout,
+		claims.ConcludeTimeout,
+		claims.SegmentsCount, bid)
+
+	err = DBS.InsertTransaction(InsertTransactionParams{
+		FileKey:            keyHex,
+		UserAddress:        claims.UserAddress,
+		FileMerkleRootHash: claims.FileHash,
+		FileName:           "RESERVED",
+		FileSize:           claims.FileSize,
+		Status:             TRANSACTION_STATUS_PENDING,
+		BidPrice:           claims.Bid,
+		UploadedAt:         claims.TimeStart,
+		ExpiresAt:          claims.TimeEnd,
+	})
+
+	if err != nil {
+		color.Set(color.FgRed)
+		printLn(err)
+		color.Unset()
+		os.Remove(path)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
 
 	// if _, err := io.Copy(h, file); err != nil {
 	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -80,6 +143,10 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 	// 	log.Print(err)
 	// 	return
 	// }
+
+	// computeFileRootMerkle()
+
+	// CG.ConcludeTransaction(claims.UserAddress,claims)
 
 	type TResp struct {
 		Ok bool `json:"ok"`

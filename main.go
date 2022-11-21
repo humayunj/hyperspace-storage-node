@@ -64,8 +64,9 @@ func initContract(contractAddress string) {
 func openDB() {
 
 	println("Opening DB")
-
-	if _, err := DBS.connect(); err != nil {
+	var err error
+	DBS, err = connectDB()
+	if err != nil {
 		panic(err)
 	}
 }

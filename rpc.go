@@ -89,11 +89,15 @@ func (s *RPCServer) InitTransaction(ctx context.Context, in *proto.InitTransacti
 	log.Println("RPC::InitTransaction")
 	color.Unset()
 	t := FileTokenParams{
-		Bid:           (in.Bid),
-		FileSize:      uint64(in.FileSize),
-		FileHash:      in.FileHash,
-		Timeperiod:    uint64(in.Timeperiod),
-		SegmentsCount: uint64(in.SegmentsCount),
+		Bid:             in.Bid,
+		FileSize:        in.FileSize,
+		FileHash:        in.FileHash,
+		TimeStart:       in.TimeStart,
+		TimeEnd:         in.TimeEnd,
+		ConcludeTimeout: in.ConcludeTimeout,
+		ProveTimeout:    in.ProveTimeout,
+		SegmentsCount:   in.SegmentsCount,
+		UserAddress:     in.UserAddress,
 	}
 	token, err := JFS.CreateFileToken(t)
 	if err != nil {
