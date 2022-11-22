@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 	"math/big"
 	"net"
@@ -37,38 +37,11 @@ func RunRPCServer() *grpc.Server {
 }
 
 func (s *RPCServer) Ping(ctx context.Context, c *proto.PingRequest) (*proto.PingResponse, error) {
-	days := float64(c.TimePeriod) / (60 * 60 * 24)
 
-	mbs := float64(c.FileSize) / (1024 * 1024)
-
-	log.Print("FileSize:", c.FileSize)
-	log.Print("Tp:", c.TimePeriod)
-
-	k := days * mbs
-	log.Print("K:", k)
-	price := new(big.Float)
-	price, valid := price.SetString(NC.FeeWeiPerMBPerDay)
-	if !valid {
-		log.Panic("Failed to parse FeeWeiPerMBPerDay", NC.FeeWeiPerMBPerDay)
+	priceInt, ok := ComputePrice(c.TimePeriod, c.FileSize)
+	if !ok {
+		return nil, errors.New("failed to compute bid")
 	}
-
-	price = price.Mul(price, big.NewFloat((k)))
-	log.Print("Price:", price.String())
-	priceInt := new(big.Int)
-
-	intVal := fmt.Sprintf("%.0f", price)
-	log.Print("intVal:", intVal)
-
-	priceInt.SetString(intVal, 10)
-	log.Print("PriceInt:", priceInt.String())
-
-	baseFee := new(big.Int)
-	baseFee, val := baseFee.SetString(NC.FeeBase, 10)
-	if !val {
-		panic("failed to parse FeeBase")
-	}
-	priceInt = priceInt.Add(priceInt, baseFee)
-
 	return &proto.PingResponse{
 		CanStore: true,
 		BidPrice: priceInt.String(),
@@ -88,6 +61,15 @@ func (s *RPCServer) InitTransaction(ctx context.Context, in *proto.InitTransacti
 	color.Set(color.FgYellow)
 	log.Println("RPC::InitTransaction")
 	color.Unset()
+
+	inBid := new(big.Int)
+	inBid, ok := inBid.SetString(in.Bid, 10)
+	if !ok {
+		return nil, errors.New("bid parsing failed")
+	}
+	if requiredBid, ok := ComputePrice(in.TimeStart-in.TimeEnd, in.FileSize); !ok || requiredBid.Cmp(inBid) == -1 {
+		return nil, errors.New("minimum bid amount required " + requiredBid.String())
+	}
 	t := FileTokenParams{
 		Bid:             in.Bid,
 		FileSize:        in.FileSize,

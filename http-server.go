@@ -89,25 +89,54 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer file.Close()
+
 	if _, err := io.Copy(newFile, file); err != nil {
 		log.Print(err)
 		// return err
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-
 	}
+	err = file.Close()
+	if err != nil {
+		log.Println("Failed to close file")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	printLn("Computing merkle root hash...")
+	root, err := ComputeFileRootMerkle(path, uint32(claims.SegmentsCount))
+	if err != nil {
+		printLn("Failed to compute merkle root hash")
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if root != claims.FileHash {
+		printLn(fmt.Sprintf("Computed merkle root hash (%v) mismatch claimed file hash (%v)", root, claims.FileHash))
+		http.Error(w, "claimed hash mismatch computed hash", http.StatusInternalServerError)
+		return
+	}
+
 	bid := new(big.Int)
 	bid, success := bid.SetString(claims.Bid, 10)
 	if !success {
 		log.Println("Failed to parse bid")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	CG.ConcludeTransaction(claims.UserAddress,
+	err = CG.ConcludeTransaction(claims.UserAddress,
 		claims.FileHash, uint32(claims.FileSize),
 		claims.TimeStart,
 		claims.TimeEnd,
 		claims.ProveTimeout,
 		claims.ConcludeTimeout,
 		claims.SegmentsCount, bid)
+	if err != nil {
+		log.Println(err.Error())
+
+		http.Error(w, "failed to conclude tx", http.StatusInternalServerError)
+		return
+	}
 
 	err = DBS.InsertTransaction(InsertTransactionParams{
 		FileKey:            keyHex,
@@ -144,10 +173,9 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	// computeFileRootMerkle()
-
 	// CG.ConcludeTransaction(claims.UserAddress,claims)
 
+	printLn("Resp")
 	type TResp struct {
 		Ok bool `json:"ok"`
 	}

@@ -33,7 +33,8 @@ var NodeWallet *Wallet
 
 func initContract(contractAddress string) {
 	// color.Set(color.FgYellow)
-	CG, cgErr := NewContractRPC(contractAddress)
+	var cgErr error
+	CG, cgErr = NewContractRPC(contractAddress)
 	if cgErr != nil {
 		color.Set(color.FgRed)
 		log.Fatalln(cgErr)
@@ -63,7 +64,7 @@ func initContract(contractAddress string) {
 
 func openDB() {
 
-	println("Opening DB")
+	printLn("Opening DB")
 	var err error
 	DBS, err = connectDB()
 	if err != nil {
@@ -73,26 +74,6 @@ func openDB() {
 
 func printLn(v ...interface{}) {
 	log.Print(v...)
-}
-
-func tokenTest() {
-	token, err := JFS.CreateFileToken(FileTokenParams{
-		FileHash: "demoFileHash",
-	})
-
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-	log.Println(token)
-
-	params, err := JFS.ParseToken(token)
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-	log.Println("Hash", params.FileHash)
-
 }
 
 func deployNewContract() (string, error) {
@@ -197,9 +178,13 @@ func main() {
 	// To Get the token
 	// tokenTest()
 	// return
-	println("Starting...")
+	log.SetFlags(log.Ldate | log.Ltime)
+	printLn("Booting...")
 	openDB()
 	NodeWallet = LoadWallet()
+	color.Set(color.FgYellow)
+	printLn("Using " + NodeWallet.account.Address.Hex() + " as signer.")
+	color.Unset()
 
 	printLn("Loading Configuration")
 
@@ -264,6 +249,20 @@ func main() {
 	color.Set(color.FgGreen)
 	println("Total Storage:", NC.TotalStorage, "B")
 	color.Unset()
+
+	tx, err := bind.NewKeyStoreTransactor(NodeWallet.ks, *NodeWallet.account)
+
+	blnc, err := EClient.BalanceAt(context.Background(), CG.contractAddress, nil)
+	if err == nil {
+		printLn(" C", blnc)
+
+		_, err = CG.instance.Withdraw(tx, blnc, NodeWallet.account.Address)
+		if err != nil {
+			printLn("With")
+		} else {
+			printLn("Withdraw ", blnc)
+		}
+	}
 
 	// FS.Open()
 	// println("Fetching Already Uploaded Files")

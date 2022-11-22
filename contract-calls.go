@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"math/big"
-	"time"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	contract "github.com/storage-node-p1/contracts"
 )
 
@@ -106,11 +107,82 @@ func (cg *ContractGateway) ConcludeTransaction(
 	concludeTimeoutLength uint64,
 	segmentsCount uint64,
 	bidAmount *big.Int) error {
+	printLn("CLG Instance", cg.instance == nil)
 
+	printLn(userAddrHex, " ", fileHash, " ", fileSize, " ",
+		timeStart, " ", timeEnd, " ", proveTimeoutLength, " ", concludeTimeoutLength, " ", segmentsCount, " ", bidAmount.String())
 	addr := common.HexToAddress(userAddrHex)
 	var hash [32]byte
 	copy(hash[:], common.Hex2Bytes(fileHash)[:32])
-	tx, err := cg.instance.ConcludeTransaction(nil, 0, addr, hash, fileSize, big.NewInt(time.Now().Unix()), big.NewInt(time.Now().Add(time.Minute*2).Unix()), proveTimeoutLength, concludeTimeoutLength, uint32(segmentsCount), bidAmount)
+	printLn("Addr:", addr)
+	printLn("hash:", hash)
+	printLn("bid:", bidAmount.String())
+
+	host, err := cg.instance.HOST(nil)
+	if err != nil {
+		panic(err)
+	}
+	printLn("host:", host)
+
+	if err != nil {
+		return err
+	}
+
+	nonce, err := EClient.PendingNonceAt(context.Background(), NodeWallet.account.Address)
+	if err != nil {
+		panic(err)
+	}
+
+	chainId, err := EClient.ChainID(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	gassPrice, err := EClient.SuggestGasPrice(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	collateralAmount := big.NewInt(1)
+	collateralAmount.Mul(bidAmount, big.NewInt(2))
+
+	// collateralAmount = collateralAmount.Add(collateralAmount, big.NewInt(10000))
+
+	valTx := types.NewTransaction(nonce, cg.contractAddress, collateralAmount, uint64(22000), gassPrice, nil)
+	sTx, err := NodeWallet.ks.SignTx(*NodeWallet.account, valTx, chainId)
+	if err != nil {
+		panic(err)
+	}
+	printLn("Sending ", collateralAmount.String(), " to contract for collateral")
+	err = EClient.SendTransaction(context.Background(), sTx)
+
+	if err != nil {
+		panic(err)
+	}
+	_, err = bind.WaitMined(context.Background(), EClient, sTx)
+	if err != nil {
+		panic("error")
+	}
+
+	printLn("Mined")
+
+	auth, err := bind.NewKeyStoreTransactor(NodeWallet.ks, *NodeWallet.account)
+	if err != nil {
+		return err
+	}
+
+	auth.GasLimit = 0
+
+	timeStartBI := new(big.Int)
+	timeStartBI.SetUint64(timeStart)
+
+	timeEndBI := new(big.Int)
+	timeEndBI.SetUint64(timeEnd)
+
+	tx, err := cg.instance.ConcludeTransaction(auth, 0,
+		addr, hash, fileSize, timeStartBI, timeEndBI,
+		proveTimeoutLength, concludeTimeoutLength,
+		uint32(segmentsCount), bidAmount)
 	_ = tx
+	printLn("done")
+
 	return err
 }
