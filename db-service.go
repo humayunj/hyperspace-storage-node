@@ -35,7 +35,7 @@ const (
 	TRANSACTION_STATUS_PENDING     TransactionStatus = 3
 )
 
-type InsertTransactionParams struct {
+type TransactionParams struct {
 	FileKey            string
 	UserAddress        string
 	FileMerkleRootHash string
@@ -47,7 +47,7 @@ type InsertTransactionParams struct {
 	UploadedAt         uint64
 }
 
-func (dbs *DBService) InsertTransaction(params InsertTransactionParams) error {
+func (dbs *DBService) InsertTransaction(params TransactionParams) error {
 
 	_, err := dbs.db.Exec(
 		`INSERT INTO transactions 
@@ -70,6 +70,21 @@ func (dbs *DBService) InsertTransaction(params InsertTransactionParams) error {
 	return err
 }
 
+func (dbs *DBService) GetTransaction(fileKey string) (TransactionParams, error) {
+
+	var tp TransactionParams
+
+	err := dbs.db.QueryRow(
+		`SELECT file_key,user_address,file_merkle_hash,
+		file_name,file_size,status,expires_at,
+		bid_price,uploaded_at FROM  transactions  WHERE file_key = ?`,
+		fileKey,
+	).Scan(&tp.FileKey, &tp.UserAddress,
+		&tp.FileMerkleRootHash, &tp.FileName,
+		&tp.FileSize, &tp.Status, &tp.ExpiresAt,
+		&tp.BidPrice, &tp.UploadedAt)
+	return tp, err
+}
 func seedDB(db *sql.DB) error {
 	const query = `
 		CREATE TABLE IF NOT EXISTS transactions (

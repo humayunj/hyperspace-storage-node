@@ -46,9 +46,10 @@ func initContract(contractAddress string) {
 	contractStats, err := CG.GetContractStats()
 	if err != nil {
 		color.Set(color.FgRed)
-		log.Println("Failed to fetch contract stats")
+		// log.Println("Failed to fetch contract stats")
 		log.Println(err)
-		color.Unset()
+		panic("Failed to establish connection with contract.")
+		// color.Unset()
 	} else {
 
 		tw := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)

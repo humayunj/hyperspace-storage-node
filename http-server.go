@@ -138,7 +138,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = DBS.InsertTransaction(InsertTransactionParams{
+	err = DBS.InsertTransaction(TransactionParams{
 		FileKey:            keyHex,
 		UserAddress:        claims.UserAddress,
 		FileMerkleRootHash: claims.FileHash,
@@ -203,7 +203,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		processUpload(w, r)
@@ -212,12 +212,43 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func processDownload(w http.ResponseWriter, r *http.Request) {
+	p := r.URL.Path
+	printLn("Path: ", p)
+	fileKey := p[5:]
+	printLn("FileKey:", fileKey)
+
+	if len(fileKey) == 0 {
+		http.Error(w, "filekey is invalid", http.StatusBadRequest)
+		return
+	}
+	tx, err := DBS.GetTransaction(fileKey)
+
+	if err != nil {
+		http.Error(w, "file not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("X-MERKLE-ROOT-HASH", tx.FileMerkleRootHash)
+
+	http.ServeFile(w, r, "./uploads/"+tx.FileKey)
+
+}
+func getHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		processDownload(w, r)
+	default:
+		w.Write([]byte("METHOD NOT ALLOWED"))
+	}
+}
 func runHTTPServer() {
 	color.Set(color.FgMagenta)
 
 	log.Println("Listening HTTP on 5555")
 	color.Unset()
-	http.HandleFunc("/upload", handler)
+	http.HandleFunc("/upload", uploadHandler)
+	http.HandleFunc("/get/", getHandler)
 	err := http.ListenAndServe(":5555", nil)
 	if err != nil {
 		log.Fatal(err)
