@@ -176,9 +176,7 @@ func deployNewContract() (string, error) {
 
 }
 func main() {
-	// To Get the token
-	// tokenTest()
-	// return
+
 	log.SetFlags(log.Ldate | log.Ltime)
 	printLn("Booting...")
 	openDB()

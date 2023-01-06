@@ -1,0 +1,15 @@
+services:
+  storage-node:
+    image: hyperspace-storage-node
+    ports:
+      - 5555:5555
+      - 8000:8000
+    working_dir: /app
+    environment:
+      store_password: "password"
+    volumes:
+      - "./uploads:/app/uploads"
+      - "./store/:/app/store"
+      - "./data.db:/app/data.db"
+      - "./config.yaml:/app/config.yaml"
+      - "./test.txt:/app/test.txt"

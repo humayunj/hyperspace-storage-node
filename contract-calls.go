@@ -177,6 +177,7 @@ func (cg *ContractGateway) ConcludeTransaction(
 	timeEndBI := new(big.Int)
 	timeEndBI.SetUint64(timeEnd)
 
+	printLn(">Conclude timeout: ", concludeTimeoutLength)
 	tx, err := cg.instance.ConcludeTransaction(auth, 0,
 		addr, hash, fileSize, timeStartBI, timeEndBI,
 		proveTimeoutLength, concludeTimeoutLength,

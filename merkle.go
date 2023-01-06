@@ -47,7 +47,6 @@ func createLeaves(file string, segmentsCount uint32) ([]merkletree.Content, erro
 		segmentSize = uint32(math.Floor(float64(fileSize-lastChunkSize) / float64(segmentsCount-1)))
 	}
 	var segments []merkletree.Content
-
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, err

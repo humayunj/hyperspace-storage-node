@@ -11,10 +11,10 @@ COPY go.sum ./
 
 
 COPY *.go ./
-COPY config.yaml ./
+# COPY config.yaml ./
 COPY ./proto/* ./proto/
 COPY ./contracts/* ./contracts/
-COPY ./store/keystore ./store/keystore
+# COPY ./store/keystore ./store/keystore
 
 RUN go mod download
 
@@ -26,6 +26,6 @@ EXPOSE 5555
 # RPC
 EXPOSE 8000 
 
-ENV store_password=password
+# ENV store_password=password
 
 CMD ./storage-node
