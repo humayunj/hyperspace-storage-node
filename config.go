@@ -15,6 +15,7 @@ type NodeConfig struct {
 	FeeWeiPerMBPerDay string `yaml:"fee-per-mb-day"`
 	FeeBase           string `yaml:"base-fee"`
 	HttpURL           string `yaml:"http-url"`
+	RpcURL            string `yaml:"rpc-url"`
 }
 
 func LoadConfig() *NodeConfig {

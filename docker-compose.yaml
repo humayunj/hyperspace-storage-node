@@ -12,4 +12,3 @@ services:
       - "./store/:/app/store"
       - "./data.db:/app/data.db"
       - "./config.yaml:/app/config.yaml"
-      - "./test.txt:/app/test.txt"

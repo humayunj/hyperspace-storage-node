@@ -121,7 +121,7 @@ func deployNewContract() (string, error) {
 		printLn(err)
 		return "", errors.New("failed to initialize factory contract")
 	}
-	tx, err := fact.CreateStorageContract(auth, []byte{}, "localhost:8000")
+	tx, err := fact.CreateStorageContract(auth, []byte{}, NC.RpcURL)
 	if err != nil {
 		printLn(err)
 		return "", errors.New("failed to create new storage contract with factory")
