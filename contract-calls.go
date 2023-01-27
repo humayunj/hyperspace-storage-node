@@ -107,7 +107,7 @@ func (cg *ContractGateway) ConcludeTransaction(
 	concludeTimeoutLength uint64,
 	segmentsCount uint64,
 	bidAmount *big.Int) error {
-	printLn("CLG Instance", cg.instance == nil)
+	printLn("CLG Instance ", cg.instance == nil)
 
 	printLn(userAddrHex, " ", fileHash, " ", fileSize, " ",
 		timeStart, " ", timeEnd, " ", proveTimeoutLength, " ", concludeTimeoutLength, " ", segmentsCount, " ", bidAmount.String())
@@ -164,7 +164,7 @@ func (cg *ContractGateway) ConcludeTransaction(
 
 	printLn("Mined")
 
-	auth, err := bind.NewKeyStoreTransactor(NodeWallet.ks, *NodeWallet.account)
+	auth, err := bind.NewKeyStoreTransactorWithChainID(NodeWallet.ks, *NodeWallet.account, chainId)
 	if err != nil {
 		return err
 	}

@@ -191,6 +191,7 @@ func main() {
 
 	gateway := NC.ProviderURL // Todo: Replace with CONFIG VAR
 	ec, err := ethclient.Dial(gateway)
+
 	if err != nil {
 		color.Set(color.FgRed)
 		printLn("Failed to connect to " + gateway + " gateway")
