@@ -43,6 +43,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
+		printLn("'file' key read error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Print(err)
 		return
