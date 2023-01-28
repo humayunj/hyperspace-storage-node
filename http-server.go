@@ -32,7 +32,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, ("Provide valid JWT token"), http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("Authorization: %v\n", authHeader)
+	// fmt.Printf("Authorization: %v\n", authHeader)
 	claims, ok := JFS.ParseToken(authHeader)
 	if ok != nil {
 		http.Error(w, "JWT token is not valid", http.StatusBadRequest)
@@ -90,10 +90,13 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	printLn("Copy: ", newFile, " => ", file)
+
 	if _, err := io.Copy(newFile, file); err != nil {
 		log.Print(err)
 		// return err
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	err = file.Close()
 	if err != nil {
@@ -199,7 +202,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprintln(tw, "Hash\t", hex.EncodeToString(hash))
 	tw.Flush()
 	color.Unset()
-	log.Println("TODO: Conclude Transaction with smart contract")
+	log.Println("TODO: Fish Transaction with smart contract")
 
 }
 

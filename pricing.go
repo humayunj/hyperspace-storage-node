@@ -12,7 +12,6 @@ func ComputePrice(timePeriod uint64, fileSize uint64) (*big.Int, bool) {
 	mbs := float64(fileSize) / (1024 * 1024)
 
 	k := days * mbs
-	log.Print("K:", k)
 	price := new(big.Float)
 	price, valid := price.SetString(NC.FeeWeiPerMBPerDay)
 	if !valid {
@@ -27,7 +26,6 @@ func ComputePrice(timePeriod uint64, fileSize uint64) (*big.Int, bool) {
 	intVal := fmt.Sprintf("%.0f", price)
 
 	priceInt.SetString(intVal, 10)
-	log.Print("PriceInt:", priceInt.String())
 
 	baseFee := new(big.Int)
 	baseFee, val := baseFee.SetString(NC.FeeBase, 10)
