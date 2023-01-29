@@ -133,7 +133,7 @@ func deployNewContract() (string, error) {
 	}
 
 	color.Set(color.FgBlue)
-	fmt.Printf("Estmations are as follows: Gas Limit = %v, Gass Price = %v, Tx Cost = %v eth. Continue? (y/N): ", tx.Gas(), tx.GasPrice(), weiToEther(tx.Cost()))
+	fmt.Printf("Estimations are as follows: Gas Limit = %v, Gass Price = %v, Tx Cost = %v eth. Continue? (y/N): ", tx.Gas(), tx.GasPrice(), weiToEther(tx.Cost()))
 	fmt.Scanln(&res)
 
 	err = EClient.SendTransaction(context.Background(), tx)
@@ -267,11 +267,11 @@ func main() {
 
 	blnc, err := EClient.BalanceAt(context.Background(), CG.contractAddress, nil)
 	if err == nil {
-		printLn("Failed ot fetch balance", blnc)
+		printLn("Balance: ", blnc)
 
 		_, err = CG.instance.Withdraw(tx, blnc, NodeWallet.account.Address)
 		if err != nil {
-			printLn("With")
+			printLn("Withdraw error")
 		} else {
 			printLn("Withdraw ", blnc)
 		}
