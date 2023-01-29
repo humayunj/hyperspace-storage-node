@@ -83,6 +83,7 @@ func deployNewContract() (string, error) {
 	addr := acc.Address
 	blnc, err := EClient.BalanceAt(context.Background(), addr, nil)
 	if err != nil {
+		printLn("Failed to fetch balance")
 		panic(err)
 	}
 	fmt.Printf("Your wallet %v with %v eth balance will be used. Continue? (y/N): ", addr.Hex(), weiToEther(blnc))
@@ -97,8 +98,12 @@ func deployNewContract() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	auth, err := bind.NewKeyStoreTransactor(NodeWallet.ks, *NodeWallet.account)
+	chainId, err := EClient.ChainID(context.Background())
+	if err != nil {
+		printLn("Failed to fetch chain id")
+		return "", err
+	}
+	auth, err := bind.NewKeyStoreTransactorWithChainID(NodeWallet.ks, *NodeWallet.account, chainId)
 	if err != nil {
 		return "", err
 	}
@@ -250,11 +255,19 @@ func main() {
 	println("Total Storage:", NC.TotalStorage, "B")
 	color.Unset()
 
-	tx, err := bind.NewKeyStoreTransactor(NodeWallet.ks, *NodeWallet.account)
+	chainId, err := EClient.ChainID(context.Background())
+	if err != nil {
+		panic("Failed to fetch chain id")
+	}
+	tx, err := bind.NewKeyStoreTransactorWithChainID(NodeWallet.ks, *NodeWallet.account, chainId)
+
+	if err != nil {
+		panic("Failed to get signer")
+	}
 
 	blnc, err := EClient.BalanceAt(context.Background(), CG.contractAddress, nil)
 	if err == nil {
-		printLn(" C", blnc)
+		printLn("Failed ot fetch balance", blnc)
 
 		_, err = CG.instance.Withdraw(tx, blnc, NodeWallet.account.Address)
 		if err != nil {
