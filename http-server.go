@@ -20,7 +20,7 @@ import (
 )
 
 func processUpload(w http.ResponseWriter, r *http.Request) {
-
+	printLn("Upload Begin")
 	authHeader := r.Header.Get("Authorization")
 	if len(authHeader) == 0 {
 		http.Error(w, ("Provide Authorization token"), http.StatusBadRequest)
@@ -43,7 +43,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
-		printLn("'file' key read error")
+		printLn("'file' key form data read error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Print(err)
 		return
@@ -203,7 +203,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprintln(tw, "Hash\t", hex.EncodeToString(hash))
 	tw.Flush()
 	color.Unset()
-	log.Println("TODO: Fish Transaction with smart contract")
+	log.Println("TODO: Finish Transaction with smart contract")
 
 }
 
