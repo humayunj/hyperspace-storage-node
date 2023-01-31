@@ -80,7 +80,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 
 	printLn("Padded Address:", hex.EncodeToString((paddedAddress[:])))
 
-	keyBytes := crypto.Keccak256(bytes.Join([][]byte{addressBytes, hashBytes}, []byte{}))
+	keyBytes := crypto.Keccak256(bytes.Join([][]byte{paddedAddress[:], hashBytes}, []byte{}))
 
 	keyHex := hex.EncodeToString(keyBytes)
 
