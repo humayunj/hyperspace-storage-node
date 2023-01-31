@@ -75,6 +75,11 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var paddedAddress [32]byte
+	copy(paddedAddress[12:], addressBytes)
+
+	printLn("Padded Address:", hex.EncodeToString((paddedAddress[:])))
+
 	keyBytes := crypto.Keccak256(bytes.Join([][]byte{addressBytes, hashBytes}, []byte{}))
 
 	keyHex := hex.EncodeToString(keyBytes)
@@ -96,11 +101,12 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 	if _, err := io.Copy(newFile, file); err != nil {
 		log.Print(err)
 		// return err
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to copy uploaded file", http.StatusInternalServerError)
 		return
 	}
 	err = file.Close()
 	if err != nil {
+		log.Println(err)
 		log.Println("Failed to close file")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
