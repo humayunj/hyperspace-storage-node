@@ -187,10 +187,12 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 
 	printLn("Resp")
 	type TResp struct {
-		Ok bool `json:"ok"`
+		Ok          bool   `json:"ok"`
+		DownloadURL string `json:"download_url"`
 	}
 	res := TResp{
-		Ok: true,
+		Ok:          true,
+		DownloadURL: NC.httpDownloadPredix + keyHex,
 	}
 	re, err := json.Marshal(res)
 	if err != nil {
