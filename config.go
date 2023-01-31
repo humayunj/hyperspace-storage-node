@@ -25,10 +25,12 @@ func LoadConfig() *NodeConfig {
 		panic("Failed to open config.yaml")
 	}
 	config := NodeConfig{}
+
 	err = yaml.Unmarshal(dat, &config)
 	if err != nil {
 		panic("Failed to load config")
 	}
+	printLn("Download Prefix: ", config.httpDownloadPredix)
 
 	return &config
 }
