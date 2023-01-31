@@ -192,7 +192,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	res := TResp{
 		Ok:          true,
-		DownloadURL: NC.httpDownloadPredix + keyHex,
+		DownloadURL: NC.HttpDownloadPrefix + keyHex,
 	}
 	re, err := json.Marshal(res)
 	if err != nil {

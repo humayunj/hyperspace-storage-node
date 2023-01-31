@@ -16,7 +16,7 @@ type NodeConfig struct {
 	FeeBase            string `yaml:"base-fee"`
 	HttpURL            string `yaml:"http-url"`
 	RpcURL             string `yaml:"rpc-url"`
-	httpDownloadPredix string `yaml:"http-download-prefix"`
+	HttpDownloadPrefix string `yaml:"http-download-prefix"`
 }
 
 func LoadConfig() *NodeConfig {
@@ -30,7 +30,6 @@ func LoadConfig() *NodeConfig {
 	if err != nil {
 		panic("Failed to load config")
 	}
-	printLn("Download Prefix: ", config.httpDownloadPredix)
 
 	return &config
 }
