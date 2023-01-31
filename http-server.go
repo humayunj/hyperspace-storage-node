@@ -230,6 +230,8 @@ func processDownload(w http.ResponseWriter, r *http.Request) {
 	fileKey := p[5:]
 	printLn("FileKey:", fileKey)
 
+	as := r.URL.Query().Get("as")
+
 	if len(fileKey) == 0 {
 		http.Error(w, "filekey is invalid", http.StatusBadRequest)
 		return
@@ -243,6 +245,9 @@ func processDownload(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("X-MERKLE-ROOT-HASH", tx.FileMerkleRootHash)
 
+	if len(as) > 0 {
+		w.Header().Set("Content-Disposition", "attachment; filename="+as)
+	}
 	http.ServeFile(w, r, "./uploads/"+tx.FileKey)
 
 }
