@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/big"
 	"net"
+	"os"
 	"time"
 
 	color "github.com/fatih/color"
@@ -91,5 +92,30 @@ func (s *RPCServer) InitTransaction(ctx context.Context, in *proto.InitTransacti
 		HttpURL:   NC.HttpURL,
 	}
 
+	return &out, nil
+}
+func (s *RPCServer) GetIntegrityProof(ctx context.Context, in *proto.IntegrityProofRequest) (*proto.IntegrityProofResponse, error) {
+
+	tx, err := DBS.GetTransaction(in.FileKey)
+	if err != nil {
+		return nil, errors.New("file with key not found")
+	}
+	p := "./uploads/" + tx.FileKey
+	if _, err := os.Stat(p); errors.Is(err, os.ErrNotExist) {
+		return nil, errors.New("file is not accessible")
+	}
+
+	proof, err := ComputeMerkleProof(p, uint32(tx.Segments), int(in.SegmentIndex))
+
+	if err != nil {
+		return nil, errors.New("failed to compute proof")
+	}
+
+	out := proto.IntegrityProofResponse{
+		Root:         proof.Root,
+		SegmentIndex: in.SegmentIndex, SegmentsCount: tx.Segments,
+		Proof: proof.Proof,
+		Data:  proof.Data,
+	}
 	return &out, nil
 }

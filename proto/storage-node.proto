@@ -1,6 +1,7 @@
 syntax = "proto3";
 // import "google/protobuf/empty.proto";
 
+// last-changed: 1-Feb-2022 9:58 PM
 package proto;
 option go_package = "./";
 
