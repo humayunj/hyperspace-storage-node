@@ -57,7 +57,7 @@ func (dbs *DBService) InsertTransaction(params TransactionParams) error {
 				file_name,file_size,status,expires_at,
 				bid_price,segments,uploaded_at
 			) 	
-				VALUES(?,?,?,?,?,?,?,?,?)`,
+				VALUES(?,?,?,?,?,?,?,?,?,?)`,
 		params.FileKey,
 		params.UserAddress,
 		params.FileMerkleRootHash,
