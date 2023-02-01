@@ -66,7 +66,14 @@ func createLeavesExt(file string, segmentsCount uint32, segmentIndex int) ([]mer
 		return nil, nil, err
 	}
 	fileSize := stats.Size()
+	o_segs := segmentsCount
 	segmentsCount = uint32(math.Ceil(float64(fileSize) / 1024))
+
+	if o_segs != segmentsCount {
+		printLn(">Seg count mismatch ", o_segs, "!=", segmentsCount)
+	} else {
+		printLn("Seg count match:", segmentsCount)
+	}
 
 	lastChunkSize := (fileSize % 1024)
 

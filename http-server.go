@@ -286,9 +286,9 @@ func processProofRequest(w http.ResponseWriter, r *http.Request) {
 
 	type TResp struct {
 		Root          string   `json:"root"`
-		Proof         []string `json:"proof"`
 		SegmentIndex  uint     `json:"segment_index"`
 		SegmentsCount uint     `json:"segments_count"`
+		Proof         []string `json:"proof"`
 		DataBase64    string   `json:"data_base64"`
 	}
 
