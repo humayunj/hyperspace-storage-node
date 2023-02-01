@@ -258,7 +258,7 @@ func processDownload(w http.ResponseWriter, r *http.Request) {
 func processProofRequest(w http.ResponseWriter, r *http.Request) {
 	p := r.URL.Path
 	printLn("Path: ", p)
-	fileKey := p[5:]
+	fileKey := p[7:]
 	printLn("FileKey:", fileKey)
 
 	if len(fileKey) == 0 {
