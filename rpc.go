@@ -104,6 +104,9 @@ func (s *RPCServer) GetIntegrityProof(ctx context.Context, in *proto.IntegrityPr
 	if _, err := os.Stat(p); errors.Is(err, os.ErrNotExist) {
 		return nil, errors.New("file is not accessible")
 	}
+	if in.SegmentIndex >= tx.Segments {
+		return nil, errors.New(("'segment index' out of bounds"))
+	}
 
 	proof, err := ComputeMerkleProof(p, uint32(tx.Segments), int(in.SegmentIndex))
 

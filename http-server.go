@@ -282,7 +282,10 @@ func processProofRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("X-MERKLE-ROOT-HASH", tx.FileMerkleRootHash)
+	if uint64(segmentIndex) >= tx.Segments {
+		http.Error(w, ("'segment index' out of bounds"), http.StatusBadRequest)
+		return
+	}
 
 	type TResp struct {
 		Root          string   `json:"root"`
