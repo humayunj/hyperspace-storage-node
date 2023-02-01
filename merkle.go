@@ -163,7 +163,7 @@ func ComputeMerkleProof(filePath string, segments uint32, segmentIndex int) (mer
 	if err != nil {
 		return nil, err
 	}
-
+	merkleProof = new(MerkleProof)
 	merkleProof.LeafIndex = segmentIndex
 	merkleProof.Proof = proof
 	merkleProof.Data = segmentData
