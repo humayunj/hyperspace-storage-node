@@ -27,6 +27,18 @@ message InitTransactionResponse {
     string httpURL = 3;
 }
 
+message IntegrityProofRequest {
+    string fileKey = 1;
+    uint64 segmentIndex = 2;
+}
+
+message IntegrityProofResponse {
+    bytes root = 1; 
+	uint64	SegmentIndex = 2;
+    uint64 segmentsCount = 3;
+    repeated bytes proof = 4;
+	bytes data = 5;
+}
 message Empty {
 
 }
@@ -51,5 +63,5 @@ service StorageNode {
     */
     rpc Ping(PingRequest) returns (PingResponse){}
 
-    
+    rpc GetIntegrityProof(IntegrityProofRequest) returns (IntegrityProofResponse){}
 }
