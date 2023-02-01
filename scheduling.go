@@ -13,7 +13,7 @@ func InitSchedular() {
 	tt := time.Now().Add(5 * time.Second).UTC()
 	printLn(tt)
 	s.Every(1).StartAt(tt).LimitRunsTo(1).Do(func() {
-		printLn("Hello " + fmt.Sprintf("%v", time.Now().UTC().String()))
+		printLn("Sch: " + fmt.Sprintf("%v", time.Now().UTC().String()))
 		t++
 	})
 	s.StartAsync()

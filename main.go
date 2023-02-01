@@ -269,11 +269,24 @@ func main() {
 	if err == nil {
 		printLn("Balance: ", blnc)
 
-		_, err = CG.instance.Withdraw(tx, blnc, NodeWallet.account.Address)
+		collateral, err := CG.instance.LockedCollateral(nil)
 		if err != nil {
-			printLn("Withdraw error")
+			println("LockedCollateral error")
+			printLn(err)
 		} else {
-			printLn("Withdraw ", blnc)
+			printLn("Collateral: ", collateral)
+			remaining := blnc.Sub(blnc, collateral)
+			printLn("Remaining: ", remaining)
+
+			if remaining.Cmp(big.NewInt(0)) == 1 {
+				_, err = CG.instance.Withdraw(tx, remaining, NodeWallet.account.Address)
+				if err != nil {
+					printLn("Withdraw error")
+					printLn(err)
+				} else {
+					printLn("Withdraw: ", remaining)
+				}
+			}
 		}
 	}
 

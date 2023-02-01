@@ -42,6 +42,7 @@ type TransactionParams struct {
 	FileName           string
 	FileSize           uint64
 	Status             TransactionStatus
+	Segments           uint64
 	BidPrice           string
 	ExpiresAt          uint64
 	UploadedAt         uint64
@@ -54,7 +55,7 @@ func (dbs *DBService) InsertTransaction(params TransactionParams) error {
 			(
 				file_key,user_address,file_merkle_hash,
 				file_name,file_size,status,expires_at,
-				bid_price,uploaded_at
+				bid_price,segments,uploaded_at
 			) 	
 				VALUES(?,?,?,?,?,?,?,?,?)`,
 		params.FileKey,
@@ -65,6 +66,7 @@ func (dbs *DBService) InsertTransaction(params TransactionParams) error {
 		params.Status,
 		params.ExpiresAt,
 		params.BidPrice,
+		params.Segments,
 		params.UploadedAt,
 	)
 	return err
@@ -77,12 +79,12 @@ func (dbs *DBService) GetTransaction(fileKey string) (TransactionParams, error) 
 	err := dbs.db.QueryRow(
 		`SELECT file_key,user_address,file_merkle_hash,
 		file_name,file_size,status,expires_at,
-		bid_price,uploaded_at FROM  transactions  WHERE file_key = ?`,
+		bid_price,segments,uploaded_at FROM  transactions  WHERE file_key = ?`,
 		fileKey,
 	).Scan(&tp.FileKey, &tp.UserAddress,
 		&tp.FileMerkleRootHash, &tp.FileName,
 		&tp.FileSize, &tp.Status, &tp.ExpiresAt,
-		&tp.BidPrice, &tp.UploadedAt)
+		&tp.BidPrice, &tp.Segments, &tp.UploadedAt)
 	return tp, err
 }
 func seedDB(db *sql.DB) error {
@@ -98,6 +100,7 @@ func seedDB(db *sql.DB) error {
 			expires_at INT UNSIGNED,
 			bid_price string,
 
+			segments INT UNSIGNED,
 			uploaded_at INT UNSIGNED
 		);
 	`

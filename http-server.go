@@ -8,12 +8,14 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	color "github.com/fatih/color"
 
+	b64 "encoding/base64"
 	"io"
 	"log"
 	"net/http"
@@ -158,6 +160,7 @@ func processUpload(w http.ResponseWriter, r *http.Request) {
 		BidPrice:           claims.Bid,
 		UploadedAt:         claims.TimeStart,
 		ExpiresAt:          claims.TimeEnd,
+		Segments:           claims.SegmentsCount,
 	})
 
 	if err != nil {
@@ -251,10 +254,83 @@ func processDownload(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./uploads/"+tx.FileKey)
 
 }
+
+func processProofRequest(w http.ResponseWriter, r *http.Request) {
+	p := r.URL.Path
+	printLn("Path: ", p)
+	fileKey := p[5:]
+	printLn("FileKey:", fileKey)
+
+	if len(fileKey) == 0 {
+		http.Error(w, "filekey is invalid", http.StatusBadRequest)
+		return
+	}
+	segmentIndexQuery := r.URL.Query().Get("index")
+	if segmentIndexQuery == "" {
+		http.Error(w, "query 'index' is required", http.StatusBadRequest)
+		return
+	}
+	segmentIndex, err := strconv.Atoi(segmentIndexQuery)
+	if err != nil {
+		http.Error(w, "query 'index' must be non-negative number", http.StatusBadRequest)
+		return
+	}
+	tx, err := DBS.GetTransaction(fileKey)
+
+	if err != nil {
+		http.Error(w, "file not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("X-MERKLE-ROOT-HASH", tx.FileMerkleRootHash)
+
+	type TResp struct {
+		Root          string   `json:"root"`
+		Proof         []string `json:"proof"`
+		SegmentIndex  uint     `json:"segment_index"`
+		SegmentsCount uint     `json:"segments_count"`
+		DataBase64    string   `json:"data_base64"`
+	}
+
+	proof, err := ComputeMerkleProof("./uploads/"+tx.FileKey, uint32(tx.Segments), segmentIndex)
+	if err != nil {
+		http.Error(w, "failed to compute proof", http.StatusInternalServerError)
+		return
+	}
+
+	var hexProof []string
+	for _, b := range proof.Proof {
+		hexProof = append(hexProof, hex.EncodeToString(b))
+	}
+
+	resp, err := json.Marshal(TResp{
+		Root:          hex.EncodeToString(proof.Root),
+		SegmentIndex:  uint(segmentIndex),
+		Proof:         hexProof,
+		DataBase64:    b64.StdEncoding.EncodeToString(proof.Data),
+		SegmentsCount: uint(tx.Segments),
+	})
+
+	if err != nil {
+		http.Error(w, "failed to parse data", http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(resp)
+
+}
 func getHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		processDownload(w, r)
+	default:
+		w.Write([]byte("METHOD NOT ALLOWED"))
+	}
+}
+func proofHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		processProofRequest(w, r)
 	default:
 		w.Write([]byte("METHOD NOT ALLOWED"))
 	}
@@ -266,6 +342,7 @@ func runHTTPServer() {
 	color.Unset()
 	http.HandleFunc("/upload", uploadHandler)
 	http.HandleFunc("/get/", getHandler)
+	http.HandleFunc("/proof/", proofHandler)
 	err := http.ListenAndServe(":5555", nil)
 	if err != nil {
 		log.Fatal(err)
