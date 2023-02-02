@@ -60,7 +60,6 @@ func GenerateMerkleRoot(leaves [][]byte) []byte {
 
 func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 	if len(hashes) == 1 {
-		tree = append(tree, hashes)
 		return tree
 	}
 	hashes = ensureEven(hashes)
