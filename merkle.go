@@ -26,9 +26,10 @@ type MerkleProof struct {
 
 func ensureEven(hashes [][]byte) [][]byte {
 	if len(hashes)%2 != 0 {
-		a := make([]byte, 0)
-		copy(a, hashes[len(hashes)-1])
-		hashes = append(hashes, a)
+		// a := make([]byte, 1)
+		// copy(a, hashes[len(hashes)-1])
+
+		hashes = append(hashes, hashes[len(hashes)-1])
 	}
 	return hashes
 }
@@ -38,10 +39,12 @@ func GenerateMerkleRoot(leaves [][]byte) []byte {
 		return nil
 	}
 	leaves = ensureEven(leaves)
-
+	// printLn("Leaves", leaves)
 	var combinedHashes [][]byte
 	for i := 0; i < len(leaves); i += 2 {
+		// printLn(hex.EncodeToString(leaves[i]), " ", hex.EncodeToString(leaves[i+1]))
 		hashConcat := bytes.Join([][]byte{leaves[i], leaves[i+1]}, []byte{})
+		// printLn(">Slice", hashConcat)
 		hash := keccak256(hashConcat)
 		combinedHashes = append(combinedHashes, hash)
 	}
@@ -203,7 +206,9 @@ func createLeaves(file string, segmentsCount uint32) ([][]byte, error) {
 func ComputeMerkleProof(filePath string, segments uint32, segmentIndex int) (merkleProof *MerkleProof, err error) {
 
 	leaves, segmentData, err := createLeavesExt(filePath, uint32(segments), segmentIndex)
-
+	if err != nil {
+		return nil, err
+	}
 	proof, directions, err := GetMerkleProof(leaves, segmentIndex)
 	if err != nil {
 		return nil, err
