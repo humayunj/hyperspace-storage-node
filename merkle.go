@@ -21,28 +21,88 @@ type MerkleProof struct {
 	Directions []uint32
 }
 
-func GetMerkleProof(m *merkletree.MerkleTree, leaveInd int) ([][]byte, []uint32, error) {
-	if leaveInd >= len(m.Leafs) {
+func ensureEven(hashes [][]byte) [][]byte {
+	if len(hashes)%2 != 0 {
+		a := make([]byte, 0)
+		copy(a, hashes[len(hashes)-1])
+		hashes = append(hashes, a)
+	}
+	return hashes
+}
+
+func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
+	if len(hashes) == 1 {
+		return nil
+	}
+	hashes = ensureEven(hashes)
+
+	combinedHashes := make([][]byte, 0)
+
+	for i := 0; i < len(hashes); i += 2 {
+		hashConcat := bytes.Join([][]byte{hashes[i], hashes[i+1]}, []byte{})
+		hash := keccak256.New().Hash(hashConcat)
+		combinedHashes = append(combinedHashes, hash)
+	}
+	tree = append(tree, combinedHashes)
+	return _generateLevel(combinedHashes, tree)
+}
+
+func GenerateMerkleTree(leaves [][]byte) [][][]byte {
+	if len(leaves) == 0 {
+		return nil
+	}
+	tree := make([][][]byte, 0)
+
+	tree = append(tree, leaves)
+
+	tree = _generateLevel(leaves, tree)
+	return tree
+}
+
+func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
+	if len(leaves) == 0 {
+		return nil, nil
+	}
+	tree := GenerateMerkleTree(leaves)
+	merkleProof := make([][]byte, 0)
+	directions := make([]uint32, 0)
+	merkleProof = append(merkleProof, leaves[leafIndex])
+	d := uint32(0)
+	if leafIndex%2 != 0 {
+		d = 1
+	}
+	directions = append(directions, d)
+
+	hashIndex := leafIndex
+	for level := 0; level < len(tree)-1; level++ {
+		isLeftChild := hashIndex%2 == 0
+
+		siblingDirection := uint32(0)
+		if isLeftChild {
+			siblingDirection = 1
+		}
+		siblingIndex := hashIndex - 1
+		if isLeftChild {
+			siblingIndex = hashIndex + 1
+		}
+		//   const siblingNode = {
+		// 	hash: tree[level][siblingIndex],
+		// 	direction: siblingDirection,
+		//   };
+		merkleProof = append(merkleProof, tree[level][siblingIndex])
+		directions = append(directions, siblingDirection)
+		//   merkleProof.push(siblingNode);
+		hashIndex = (hashIndex / 2)
+	}
+	return merkleProof, directions
+}
+func GetMerkleProof(leaves [][]byte, leaveInd int) ([][]byte, []uint32, error) {
+	if leaveInd >= len(leaves) {
 		return nil, nil, errors.New("leave index out of bounds")
 	}
-	current := m.Leafs[leaveInd]
 
-	currentParent := current.Parent
-	var merklePath [][]byte
-	var index []uint32
-	for currentParent != nil {
-		if bytes.Equal(currentParent.Left.Hash, current.Hash) {
-			merklePath = append(merklePath, currentParent.Right.Hash)
-			index = append(index, 1) // right leaf
-		} else {
-			merklePath = append(merklePath, currentParent.Left.Hash)
-			index = append(index, 0) // left leaf
-		}
-		current = currentParent
-		currentParent = currentParent.Parent
-	}
-	return merklePath, index, nil
-
+	path, dir := GenerateMerkleProof(uint(leaveInd), leaves)
+	return path, dir, nil
 }
 
 type TContent struct {
@@ -60,7 +120,7 @@ func (t TContent) CalculateHash() ([]byte, error) {
 func (t TContent) Equals(other merkletree.Content) (bool, error) {
 	return bytes.Equal(t.x, other.(TContent).x), nil
 }
-func createLeavesExt(file string, segmentsCount uint32, segmentIndex int) ([]merkletree.Content, []byte, error) {
+func createLeavesExt(file string, segmentsCount uint32, segmentIndex int) ([][]byte, []byte, error) {
 
 	stats, err := os.Stat(file)
 	if err != nil {
@@ -85,7 +145,7 @@ func createLeavesExt(file string, segmentsCount uint32, segmentIndex int) ([]mer
 	} else {
 		segmentSize = uint32(math.Floor(float64(fileSize-lastChunkSize) / float64(segmentsCount-1)))
 	}
-	var segments []merkletree.Content
+	var segments [][]byte
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, nil, err
@@ -103,7 +163,7 @@ func createLeavesExt(file string, segmentsCount uint32, segmentIndex int) ([]mer
 		if n > 0 {
 			// printLn(">seg:", hex.EncodeToString(chunk[:n])[:30])
 			c := chunk[:n]
-			segments = append(segments, TContent{keccak256.New().Hash(c)})
+			segments = append(segments, keccak256.New().Hash(c))
 			if i == (segmentIndex) {
 				segData = *bytes.NewBuffer(c)
 			}
@@ -114,7 +174,7 @@ func createLeavesExt(file string, segmentsCount uint32, segmentIndex int) ([]mer
 	return segments, segData.Bytes(), nil
 
 }
-func createLeaves(file string, segmentsCount uint32) ([]merkletree.Content, error) {
+func createLeaves(file string, segmentsCount uint32) ([][]byte, error) {
 	leaves, _, err := createLeavesExt(file, segmentsCount, -1)
 	return leaves, err
 }
@@ -165,7 +225,7 @@ func ComputeMerkleProof(filePath string, segments uint32, segmentIndex int) (mer
 		return nil, err
 	}
 
-	proof, directions, err := GetMerkleProof(tree, segmentIndex)
+	proof, directions, err := GetMerkleProof(leaves, segmentIndex)
 	if err != nil {
 		return nil, err
 	}
