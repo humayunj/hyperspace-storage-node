@@ -28,7 +28,6 @@ func ensureEven(hashes [][]byte) [][]byte {
 	if len(hashes)%2 != 0 {
 		// a := make([]byte, 1)
 		// copy(a, hashes[len(hashes)-1])
-		printLn("Appending as ", len(hashes))
 		h := hashes[:]
 		h = append(h, (hashes)[len(hashes)-1])
 		return h
@@ -41,10 +40,8 @@ func GenerateMerkleRoot(leaves [][]byte) []byte {
 	if len(leaves) == 0 {
 		return nil
 	}
-	printLn("Pre Leaves length: ", len(leaves))
 
 	leaves = ensureEven(leaves)
-	printLn("Leaves length: ", len(leaves))
 	// printLn("Leaves", leaves)
 	var combinedHashes [][]byte
 	for i := 0; i < len(leaves); i += 2 {
@@ -62,26 +59,11 @@ func GenerateMerkleRoot(leaves [][]byte) []byte {
 
 func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 	if len(hashes) == 1 {
-		printLn("return 1")
-
-		printLn(">>>>")
-		for i, r := range tree {
-			printLn("Level: ", i, " len:", len(r))
-			if len(r) < 15 {
-				for _, n := range r {
-					printLn(n)
-				}
-				printLn(("\n"))
-			}
-		}
 
 		return tree[:]
 	}
-	printLn("Pre hash length: ", len(hashes))
 	hashes = ensureEven(hashes)
 	tree[len(tree)-1] = hashes
-
-	printLn("Leaves length: ", len(hashes))
 
 	combinedHashes := make([][]byte, 0)
 
@@ -90,7 +72,6 @@ func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 		hash := keccak256(hashConcat)
 		combinedHashes = append(combinedHashes, hash[:])
 	}
-	printLn(">Combined hashes length:", len(combinedHashes))
 	cHashes := combinedHashes[:]
 	treeN := tree[:]
 	treeN = append(treeN, cHashes)
@@ -115,15 +96,7 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 		return nil, nil
 	}
 	tree := GenerateMerkleTree(leaves)
-	for i, r := range tree {
-		printLn("Level: ", i, " len:", len(r))
-		if len(r) < 15 {
-			for _, n := range r {
-				printLn(n)
-			}
-			printLn(("\n"))
-		}
-	}
+
 	merkleProof := make([][]byte, 0, 10)
 	directions := make([]uint32, 0, 10)
 	merkleProof = append(merkleProof, leaves[leafIndex])
@@ -134,7 +107,6 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 	directions = append(directions, d)
 
 	hashIndex := leafIndex
-	printLn("Tree Length:", len(tree))
 	for level := 0; level < len(tree)-1; level++ {
 		isLeftChild := hashIndex%2 == 0
 
@@ -151,7 +123,6 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 		// 	direction: siblingDirection,
 		//   };
 
-		printLn("Tree([Level]length)", len(tree[level]))
 		if int(siblingIndex) >= len(tree[level]) {
 			printLn("sibling out of range: ", siblingIndex, len(tree[level]))
 			return nil, nil
