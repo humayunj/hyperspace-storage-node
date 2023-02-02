@@ -70,7 +70,7 @@ func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 
 	printLn("Leaves length: ", len(hashes))
 
-	var combinedHashes [][]byte
+	combinedHashes := make([][]byte, 0)
 
 	for i := 0; i < len(hashes); i += 2 {
 		hashConcat := bytes.Join([][]byte{hashes[i], hashes[i+1]}, []byte{})
@@ -78,8 +78,10 @@ func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 		combinedHashes = append(combinedHashes, hash[:])
 	}
 	printLn(">Combined hashes length:", len(combinedHashes))
-	tree = append(tree, combinedHashes)
-	return _generateLevel(combinedHashes, tree)
+	cHashes := combinedHashes[:]
+	treeN := tree[:]
+	treeN = append(treeN, cHashes)
+	return _generateLevel(cHashes, treeN)
 }
 
 func GenerateMerkleTree(leaves [][]byte) [][][]byte {
