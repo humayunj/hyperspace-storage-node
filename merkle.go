@@ -80,7 +80,7 @@ func GenerateMerkleTree(leaves [][]byte) [][][]byte {
 	tree = append(tree, leaves)
 
 	tree = _generateLevel(leaves, tree)
-	printLn("ttt", tree)
+	// printLn("ttt", tree)
 	return tree
 }
 
@@ -99,7 +99,7 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 	directions = append(directions, d)
 
 	hashIndex := leafIndex
-	printLn("Tree", len(tree))
+	// printLn("Tree", len(tree))
 	for level := 0; level < len(tree)-1; level++ {
 		isLeftChild := hashIndex%2 == 0
 

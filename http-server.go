@@ -283,7 +283,9 @@ func processProofRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if uint64(segmentIndex) >= tx.Segments {
-		http.Error(w, ("'segment index' out of bounds"), http.StatusBadRequest)
+		http.Error(w, ("'segment index' out of bounds " + strconv.FormatInt(int64(segmentIndex), 10) + " >= " +
+
+			strconv.FormatInt(int64(tx.Segments), 10)), http.StatusBadRequest)
 		return
 	}
 
