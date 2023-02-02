@@ -99,13 +99,15 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 		return nil, nil
 	}
 	tree := GenerateMerkleTree(leaves)
-	// for i, r := range tree {
-	// 	printLn("Level: ", i)
-	// 	for _, n := range r {
-	// 		printLn(n)
-	// 	}
-	// 	printLn(("\n"))
-	// }
+	for i, r := range tree {
+		printLn("Level: ", i, " len:", len(r))
+		if len(r) < 15 {
+			for _, n := range r {
+				printLn(n)
+			}
+			printLn(("\n"))
+		}
+	}
 	merkleProof := make([][]byte, 0, 10)
 	directions := make([]uint32, 0, 10)
 	merkleProof = append(merkleProof, leaves[leafIndex])
