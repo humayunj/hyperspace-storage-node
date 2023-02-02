@@ -4,14 +4,17 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-	"hash"
 	"io"
 	"math"
 	"os"
 
 	"github.com/cbergoon/merkletree"
-	"github.com/wealdtech/go-merkletree/keccak256"
+	gm "github.com/wealdtech/go-merkletree/keccak256"
 )
+
+func keccak256(b []byte) []byte {
+	return gm.New().Hash(b)
+}
 
 type MerkleProof struct {
 	Root       []byte
@@ -30,6 +33,24 @@ func ensureEven(hashes [][]byte) [][]byte {
 	return hashes
 }
 
+func GenerateMerkleRoot(leaves [][]byte) []byte {
+	if len(leaves) == 0 {
+		return nil
+	}
+	leaves = ensureEven(leaves)
+
+	var combinedHashes [][]byte
+	for i := 0; i < len(leaves); i += 2 {
+		hashConcat := bytes.Join([][]byte{leaves[i], leaves[i+1]}, []byte{})
+		hash := keccak256(hashConcat)
+		combinedHashes = append(combinedHashes, hash)
+	}
+	if len(combinedHashes) == 1 {
+		return combinedHashes[0]
+	}
+	return GenerateMerkleRoot(combinedHashes)
+}
+
 func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 	if len(hashes) == 1 {
 		return nil
@@ -40,7 +61,7 @@ func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 
 	for i := 0; i < len(hashes); i += 2 {
 		hashConcat := bytes.Join([][]byte{hashes[i], hashes[i+1]}, []byte{})
-		hash := keccak256.New().Hash(hashConcat)
+		hash := keccak256(hashConcat)
 		combinedHashes = append(combinedHashes, hash)
 	}
 	tree = append(tree, combinedHashes)
@@ -163,7 +184,7 @@ func createLeavesExt(file string, segmentsCount uint32, segmentIndex int) ([][]b
 		if n > 0 {
 			// printLn(">seg:", hex.EncodeToString(chunk[:n])[:30])
 			c := chunk[:n]
-			segments = append(segments, keccak256.New().Hash(c))
+			segments = append(segments, keccak256(c))
 			if i == (segmentIndex) {
 				segData = *bytes.NewBuffer(c)
 			}
@@ -179,51 +200,9 @@ func createLeaves(file string, segmentsCount uint32) ([][]byte, error) {
 	return leaves, err
 }
 
-type Keccak256Hash struct {
-	buffer []byte
-}
-
-func (k *Keccak256Hash) Write(p []byte) (n int, err error) {
-	k.buffer = append(k.buffer, p...)
-	return len(p), nil
-}
-func (k *Keccak256Hash) Sum(b []byte) []byte {
-	if b != nil {
-		k.Write(b)
-	}
-	// printLn("Hash: ", hex.EncodeToString(keccak256.New().Hash(k.buffer)))
-
-	return keccak256.New().Hash(k.buffer)
-}
-func (k *Keccak256Hash) Reset() {
-	k.buffer = make([]byte, 0)
-}
-func (k *Keccak256Hash) Size() int {
-	return 32
-}
-
-func (k *Keccak256Hash) BlockSize() int {
-	return len(k.buffer)
-}
-
 func ComputeMerkleProof(filePath string, segments uint32, segmentIndex int) (merkleProof *MerkleProof, err error) {
 
 	leaves, segmentData, err := createLeavesExt(filePath, uint32(segments), segmentIndex)
-
-	if err != nil {
-		return nil, err
-	}
-
-	k := new(Keccak256Hash)
-	k.buffer = make([]byte, 0)
-
-	tree, err := merkletree.NewTreeWithHashStrategy(leaves, func() hash.Hash {
-		return &Keccak256Hash{buffer: make([]byte, 0)}
-	})
-
-	if err != nil {
-		return nil, err
-	}
 
 	proof, directions, err := GetMerkleProof(leaves, segmentIndex)
 	if err != nil {
@@ -233,13 +212,13 @@ func ComputeMerkleProof(filePath string, segments uint32, segmentIndex int) (mer
 	merkleProof.LeafIndex = segmentIndex
 	merkleProof.Proof = proof
 	merkleProof.Data = segmentData
-	merkleProof.Root = tree.Root.Hash
+	merkleProof.Root = GenerateMerkleRoot(leaves)
 	merkleProof.Directions = directions
 
 	return merkleProof, err
 }
 
-func ComputeFileRootMerkle(filePath string, segments uint32) (root string, err error) {
+func ComputeFileRootMerkle(filePath string, segments uint32) (string, error) {
 
 	leaves, err := createLeaves(filePath, uint32(segments))
 
@@ -247,17 +226,8 @@ func ComputeFileRootMerkle(filePath string, segments uint32) (root string, err e
 		return "", err
 	}
 
-	k := new(Keccak256Hash)
-	k.buffer = make([]byte, 0)
+	root := GenerateMerkleRoot(leaves)
 
-	tree, err := merkletree.NewTreeWithHashStrategy(leaves, func() hash.Hash {
-		return &Keccak256Hash{buffer: make([]byte, 0)}
-	})
-
-	if err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(tree.MerkleRoot()), nil
+	return hex.EncodeToString(root), nil
 
 }
