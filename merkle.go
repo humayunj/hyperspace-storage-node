@@ -29,11 +29,12 @@ func ensureEven(hashes [][]byte) [][]byte {
 		// a := make([]byte, 1)
 		// copy(a, hashes[len(hashes)-1])
 		printLn("Appending as ", len(hashes))
-
-		hashes = append(hashes, (hashes)[len(hashes)-1])
+		h := hashes[:]
+		h = append(h, (hashes)[len(hashes)-1])
+		return h
 	}
 
-	return hashes[:]
+	return hashes
 }
 
 func GenerateMerkleRoot(leaves [][]byte) []byte {
@@ -61,6 +62,7 @@ func GenerateMerkleRoot(leaves [][]byte) []byte {
 
 func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 	if len(hashes) == 1 {
+		printLn("return 1")
 		return tree
 	}
 	printLn("Pre hash length: ", len(hashes))
@@ -75,7 +77,7 @@ func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 		hash := keccak256(hashConcat)
 		combinedHashes = append(combinedHashes, hash)
 	}
-	tree = append(tree, combinedHashes[:])
+	tree = append(tree, combinedHashes)
 	return _generateLevel(combinedHashes, tree)
 }
 
