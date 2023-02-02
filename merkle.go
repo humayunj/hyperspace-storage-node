@@ -93,7 +93,18 @@ func GenerateMerkleTree(leaves [][]byte) [][][]byte {
 	tree = append(tree, leaves)
 
 	tree = _generateLevel(leaves, tree)
-	// printLn("ttt", tree)
+
+	printLn(">>>>")
+	for i, r := range tree {
+		printLn("Level: ", i, " len:", len(r))
+		if len(r) < 15 {
+			for _, n := range r {
+				printLn(n)
+			}
+			printLn(("\n"))
+		}
+	}
+
 	return tree
 }
 
