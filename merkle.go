@@ -115,7 +115,13 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 		// 	hash: tree[level][siblingIndex],
 		// 	direction: siblingDirection,
 		//   };
-		printLn("Tree([Level]length)", level)
+
+		printLn("Tree([Level]length)", len(tree[level]))
+		if len(tree[level]) < int(siblingIndex) {
+			printLn("sibling out of range: ", siblingIndex, len(tree[level]))
+			return nil, nil
+		}
+
 		merkleProof = append(merkleProof, tree[level][siblingIndex])
 		directions = append(directions, siblingDirection)
 		//   merkleProof.push(siblingNode);
