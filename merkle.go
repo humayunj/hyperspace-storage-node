@@ -77,6 +77,7 @@ func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 		hash := keccak256(hashConcat)
 		combinedHashes = append(combinedHashes, hash[:])
 	}
+	printLn(">Combined hashes length:", len(combinedHashes))
 	tree = append(tree, combinedHashes)
 	return _generateLevel(combinedHashes, tree)
 }
