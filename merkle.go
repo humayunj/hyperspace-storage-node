@@ -79,6 +79,7 @@ func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 	}
 	printLn("Pre hash length: ", len(hashes))
 	hashes = ensureEven(hashes)
+	tree[len(tree)-1] = hashes
 
 	printLn("Leaves length: ", len(hashes))
 
