@@ -117,8 +117,9 @@ func (s *RPCServer) GetIntegrityProof(ctx context.Context, in *proto.IntegrityPr
 	out := proto.IntegrityProofResponse{
 		Root:         proof.Root,
 		SegmentIndex: in.SegmentIndex, SegmentsCount: tx.Segments,
-		Proof: proof.Proof,
-		Data:  proof.Data,
+		Proof:      proof.Proof,
+		Data:       proof.Data,
+		Directions: proof.Directions,
 	}
 	return &out, nil
 }

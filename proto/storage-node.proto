@@ -38,7 +38,8 @@ message IntegrityProofResponse {
 	uint64	SegmentIndex = 2;
     uint64 segmentsCount = 3;
     repeated bytes proof = 4;
-	bytes data = 5;
+    repeated uint32 directions = 5;
+	bytes data = 6;
 }
 message Empty {
 

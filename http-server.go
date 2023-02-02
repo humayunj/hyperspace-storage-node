@@ -292,6 +292,7 @@ func processProofRequest(w http.ResponseWriter, r *http.Request) {
 		SegmentIndex  uint     `json:"segment_index"`
 		SegmentsCount uint     `json:"segments_count"`
 		Proof         []string `json:"proof"`
+		Directions    []uint32 `json:"directions"`
 		DataBase64    string   `json:"data_base64"`
 	}
 
@@ -312,6 +313,7 @@ func processProofRequest(w http.ResponseWriter, r *http.Request) {
 		Proof:         hexProof,
 		DataBase64:    b64.StdEncoding.EncodeToString(proof.Data),
 		SegmentsCount: uint(tx.Segments),
+		Directions:    proof.Directions,
 	})
 
 	if err != nil {

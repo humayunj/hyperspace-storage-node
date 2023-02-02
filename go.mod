@@ -10,7 +10,7 @@ replace github.com/storage-node-p1/contracts => ./contracts/
 
 require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.0 // indirect
-	github.com/cbergoon/merkletree v0.2.0 // indirect
+	github.com/cbergoon/merkletree v0.2.0
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/dgraph-io/badger/v3 v3.2103.4
 	github.com/ethereum/go-ethereum v1.10.26
@@ -20,8 +20,8 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/storage-node-p1/contracts v0.0.0-00010101000000-000000000000
 	github.com/storage-node-p1/storage-node-proto v0.0.0-00010101000000-000000000000
-	github.com/wealdtech/go-merkletree v1.0.0
-	golang.org/x/crypto v0.1.0 // indirect
+	github.com/wealdtech/go-merkletree v1.0.1-0.20230130203728-6cf3f5aa504d // indirect
+	golang.org/x/net v0.5.0 // indirect
 	google.golang.org/grpc v1.50.1
 	gopkg.in/yaml.v3 v3.0.1
 

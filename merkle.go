@@ -14,33 +14,34 @@ import (
 )
 
 type MerkleProof struct {
-	Root      []byte
-	LeafIndex int
-	Proof     [][]byte
-	Data      []byte
+	Root       []byte
+	LeafIndex  int
+	Proof      [][]byte
+	Data       []byte
+	Directions []uint32
 }
 
-func GetMerkleProof(m *merkletree.MerkleTree, leaveInd int) ([][]byte, error) {
+func GetMerkleProof(m *merkletree.MerkleTree, leaveInd int) ([][]byte, []uint32, error) {
 	if leaveInd >= len(m.Leafs) {
-		return nil, errors.New("leave index out of bounds")
+		return nil, nil, errors.New("leave index out of bounds")
 	}
 	current := m.Leafs[leaveInd]
 
 	currentParent := current.Parent
 	var merklePath [][]byte
-	// var index []int64
+	var index []uint32
 	for currentParent != nil {
 		if bytes.Equal(currentParent.Left.Hash, current.Hash) {
 			merklePath = append(merklePath, currentParent.Right.Hash)
-			// index = append(index, 1) // right leaf
+			index = append(index, 1) // right leaf
 		} else {
 			merklePath = append(merklePath, currentParent.Left.Hash)
-			// index = append(index, 0) // left leaf
+			index = append(index, 0) // left leaf
 		}
 		current = currentParent
 		currentParent = currentParent.Parent
 	}
-	return merklePath, nil
+	return merklePath, index, nil
 
 }
 
@@ -163,10 +164,8 @@ func ComputeMerkleProof(filePath string, segments uint32, segmentIndex int) (mer
 	if err != nil {
 		return nil, err
 	}
-	for _, t := range tree.Leafs {
-		printLn(hex.EncodeToString(t.Hash))
-	}
-	proof, err := GetMerkleProof(tree, segmentIndex)
+
+	proof, directions, err := GetMerkleProof(tree, segmentIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -175,6 +174,7 @@ func ComputeMerkleProof(filePath string, segments uint32, segmentIndex int) (mer
 	merkleProof.Proof = proof
 	merkleProof.Data = segmentData
 	merkleProof.Root = tree.Root.Hash
+	merkleProof.Directions = directions
 
 	return merkleProof, err
 }
