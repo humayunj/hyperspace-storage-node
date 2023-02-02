@@ -29,10 +29,11 @@ func ensureEven(hashes [][]byte) [][]byte {
 		// a := make([]byte, 1)
 		// copy(a, hashes[len(hashes)-1])
 		printLn("Appending as ", len(hashes))
+
 		hashes = append(hashes, (hashes)[len(hashes)-1])
 	}
 
-	return hashes
+	return hashes[:]
 }
 
 func GenerateMerkleRoot(leaves [][]byte) []byte {
@@ -62,16 +63,19 @@ func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 	if len(hashes) == 1 {
 		return tree
 	}
+	printLn("Pre hash length: ", len(hashes))
 	hashes = ensureEven(hashes)
 
-	combinedHashes := make([][]byte, 0)
+	printLn("Leaves length: ", len(hashes))
+
+	var combinedHashes [][]byte
 
 	for i := 0; i < len(hashes); i += 2 {
 		hashConcat := bytes.Join([][]byte{hashes[i], hashes[i+1]}, []byte{})
 		hash := keccak256(hashConcat)
 		combinedHashes = append(combinedHashes, hash)
 	}
-	tree = append(tree, combinedHashes)
+	tree = append(tree, combinedHashes[:])
 	return _generateLevel(combinedHashes, tree)
 }
 
@@ -93,13 +97,13 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 		return nil, nil
 	}
 	tree := GenerateMerkleTree(leaves)
-	for i, r := range tree {
-		printLn("Level: ", i)
-		for _, n := range r {
-			printLn(n)
-		}
-		printLn(("\n"))
-	}
+	// for i, r := range tree {
+	// 	printLn("Level: ", i)
+	// 	for _, n := range r {
+	// 		printLn(n)
+	// 	}
+	// 	printLn(("\n"))
+	// }
 	merkleProof := make([][]byte, 0, 10)
 	directions := make([]uint32, 0, 10)
 	merkleProof = append(merkleProof, leaves[leafIndex])
