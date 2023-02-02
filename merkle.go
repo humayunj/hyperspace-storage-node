@@ -28,9 +28,10 @@ func ensureEven(hashes [][]byte) [][]byte {
 	if len(hashes)%2 != 0 {
 		// a := make([]byte, 1)
 		// copy(a, hashes[len(hashes)-1])
-
-		hashes = append(hashes, hashes[len(hashes)-1])
+		printLn("Appending as ", len(hashes))
+		hashes = append(hashes, (hashes)[len(hashes)-1])
 	}
+
 	return hashes
 }
 
@@ -38,7 +39,10 @@ func GenerateMerkleRoot(leaves [][]byte) []byte {
 	if len(leaves) == 0 {
 		return nil
 	}
+	printLn("Pre Leaves length: ", len(leaves))
+
 	leaves = ensureEven(leaves)
+	printLn("Leaves length: ", len(leaves))
 	// printLn("Leaves", leaves)
 	var combinedHashes [][]byte
 	for i := 0; i < len(leaves); i += 2 {
