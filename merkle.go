@@ -39,13 +39,13 @@ func GenerateMerkleRoot(leaves [][]byte) []byte {
 		return nil
 	}
 	leaves = ensureEven(leaves)
-	// printLn("Leaves", leaves)
+	printLn("Leaves", leaves)
 	var combinedHashes [][]byte
 	for i := 0; i < len(leaves); i += 2 {
 		// printLn(hex.EncodeToString(leaves[i]), " ", hex.EncodeToString(leaves[i+1]))
 		hashConcat := bytes.Join([][]byte{leaves[i], leaves[i+1]}, []byte{})
-		// printLn(">Slice", hashConcat)
 		hash := keccak256(hashConcat)
+		printLn(">Hash", hash)
 		combinedHashes = append(combinedHashes, hash)
 	}
 	if len(combinedHashes) == 1 {
