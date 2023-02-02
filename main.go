@@ -183,6 +183,17 @@ func deployNewContract() (string, error) {
 func main() {
 	// mainMerkle()
 
+	// proof, dir := GenerateMerkleProof(1, [][]byte{
+	// 	[]byte("hello"),
+	// 	[]byte("world!"),
+	// 	[]byte("hello"),
+	// 	[]byte("hello"),
+	// 	[]byte("hello"),
+	// })
+	// printLn(proof)
+	// printLn(dir)
+
+	// panic("exit")
 	log.SetFlags(log.Ldate | log.Ltime)
 	printLn("Booting...")
 	openDB()

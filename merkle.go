@@ -39,13 +39,13 @@ func GenerateMerkleRoot(leaves [][]byte) []byte {
 		return nil
 	}
 	leaves = ensureEven(leaves)
-	printLn("Leaves", leaves)
+	// printLn("Leaves", leaves)
 	var combinedHashes [][]byte
 	for i := 0; i < len(leaves); i += 2 {
 		// printLn(hex.EncodeToString(leaves[i]), " ", hex.EncodeToString(leaves[i+1]))
 		hashConcat := bytes.Join([][]byte{leaves[i], leaves[i+1]}, []byte{})
 		hash := keccak256(hashConcat)
-		printLn(">Hash", hash)
+		// printLn(">Hash", hash)
 		combinedHashes = append(combinedHashes, hash)
 	}
 	if len(combinedHashes) == 1 {
@@ -56,7 +56,7 @@ func GenerateMerkleRoot(leaves [][]byte) []byte {
 
 func _generateLevel(hashes [][]byte, tree [][][]byte) [][][]byte {
 	if len(hashes) == 1 {
-		return nil
+		return tree
 	}
 	hashes = ensureEven(hashes)
 
@@ -80,6 +80,7 @@ func GenerateMerkleTree(leaves [][]byte) [][][]byte {
 	tree = append(tree, leaves)
 
 	tree = _generateLevel(leaves, tree)
+	printLn("ttt", tree)
 	return tree
 }
 
@@ -88,8 +89,8 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 		return nil, nil
 	}
 	tree := GenerateMerkleTree(leaves)
-	merkleProof := make([][]byte, 0)
-	directions := make([]uint32, 0)
+	merkleProof := make([][]byte, 0, 10)
+	directions := make([]uint32, 0, 10)
 	merkleProof = append(merkleProof, leaves[leafIndex])
 	d := uint32(0)
 	if leafIndex%2 != 0 {
@@ -98,6 +99,7 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 	directions = append(directions, d)
 
 	hashIndex := leafIndex
+	printLn("Tree", len(tree))
 	for level := 0; level < len(tree)-1; level++ {
 		isLeftChild := hashIndex%2 == 0
 
