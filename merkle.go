@@ -117,7 +117,7 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 		//   };
 
 		printLn("Tree([Level]length)", len(tree[level]))
-		if len(tree[level]) < int(siblingIndex) {
+		if int(siblingIndex) >= len(tree[level]) {
 			printLn("sibling out of range: ", siblingIndex, len(tree[level]))
 			return nil, nil
 		}
