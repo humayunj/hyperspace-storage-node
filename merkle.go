@@ -99,7 +99,7 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 	directions = append(directions, d)
 
 	hashIndex := leafIndex
-	// printLn("Tree", len(tree))
+	printLn("Tree Length:", len(tree))
 	for level := 0; level < len(tree)-1; level++ {
 		isLeftChild := hashIndex%2 == 0
 
@@ -115,6 +115,7 @@ func GenerateMerkleProof(leafIndex uint, leaves [][]byte) ([][]byte, []uint32) {
 		// 	hash: tree[level][siblingIndex],
 		// 	direction: siblingDirection,
 		//   };
+		printLn("Tree([Level]length)", level)
 		merkleProof = append(merkleProof, tree[level][siblingIndex])
 		directions = append(directions, siblingDirection)
 		//   merkleProof.push(siblingNode);
