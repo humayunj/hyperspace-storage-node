@@ -181,8 +181,8 @@ func deployNewContract() (string, error) {
 
 }
 func main() {
-	mainMerkle()
-	panic("exit")
+	// mainMerkle()
+	// panic("exit")
 	log.SetFlags(log.Ldate | log.Ltime)
 	printLn("Booting...")
 	openDB()
